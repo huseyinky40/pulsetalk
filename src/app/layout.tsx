@@ -19,6 +19,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${sora.variable} ${orbitron.variable}`}
     >
+      {/* INITIAL THEME SCRIPT: boyamadan önce localStorage.theme uygula */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+      (function() {
+        try {
+          var saved = localStorage.getItem('theme');
+          var mql = window.matchMedia('(prefers-color-scheme: dark)');
+          var useDark = saved ? saved === 'dark' : mql.matches;
+          if (useDark) document.documentElement.classList.add('dark');
+        } catch(e) {}
+      })();
+      `,
+        }}
+      />
+
       <body className="font-[var(--font-sora)] min-h-screen relative text-gray-900 dark:text-gray-100">
         {/* BACKGROUND: gradient + dots */}
         <div className="fixed inset-0 -z-10">
