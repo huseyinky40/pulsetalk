@@ -6,9 +6,13 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLang } from '../../components/LangProvider';
+import { getUserByUsername } from '../../lib/userStore';
 
 const schema = z.object({
-  email: z.string().email('Geçerli bir e-posta girin'),
+  username: z
+    .string()
+    .min(3, 'Kullanıcı adı gerekli')
+    .max(15, 'Kullanıcı adı en fazla 15 karakter olabilir'),
   password: z.string().min(1, 'Şifre gerekli'),
   remember: z.boolean().optional(),
 });
@@ -16,7 +20,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const {
     register,
     handleSubmit,
@@ -26,11 +30,26 @@ export default function LoginPage() {
     defaultValues: { remember: true },
   });
   const [submitting, setSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const onSubmit = async (data: FormData) => {
+    setLoginError(null);
     setSubmitting(true);
-    console.log('Login verisi:', data);
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    try {
+      const user = await getUserByUsername(data.username.trim());
+
+      if (!user || user.password !== data.password) {
+        setLoginError(t('invalidCredentials'));
+      } else {
+        alert(t('loginSuccess'));
+      }
+    } catch (error) {
+      console.error('Giriş kontrolü başarısız:', error);
+      setLoginError(t('invalidCredentials'));
+    }
+
     setSubmitting(false);
   };
 
@@ -49,15 +68,16 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1">{t('email')}</label>
+            <label className="block text-sm mb-1">{t('username')}</label>
             <input
-              type="email"
-              {...register('email')}
+              type="text"
+              maxLength={15}
+              {...register('username')}
               className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2"
-              placeholder="ornek@mail.com"
+              placeholder={lang === 'tr' ? 'Kullanıcı adın' : 'Your username'}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+            {errors.username && (
+              <p className="text-sm text-red-500 mt-1">{errors.username.message}</p>
             )}
           </div>
 
@@ -95,6 +115,8 @@ export default function LoginPage() {
           >
             {t('loginTitle')}
           </button>
+
+          {loginError && <p className="text-sm text-red-500 text-center">{loginError}</p>}
         </form>
 
         <p className="text-sm mt-4">
@@ -107,4 +129,3 @@ export default function LoginPage() {
     </main>
   );
 }
-
