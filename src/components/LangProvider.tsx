@@ -30,6 +30,13 @@ const dict: Dict = {
   birth:           { tr: 'Doğum Tarihi (GG/AA/YYYY)', en: 'Birth Date (DD/MM/YYYY)' },
   notRobot:        { tr: 'Robot değilim (dummy)', en: 'I am not a robot (dummy)' },
   haveAccount:     { tr: 'Zaten hesabın var mı?', en: 'Already have an account?' },
+
+  // login
+  loginTitle:      { tr: 'Giriş Yap', en: 'Log In' },
+  welcomeBack:     { tr: 'Tekrar hoş geldin! Konuşmaya hazırsın.', en: 'Welcome back! Ready to keep the conversation going.' },
+  rememberMe:      { tr: 'Beni hatırla', en: 'Remember me' },
+  forgotPassword:  { tr: 'Şifreni mi unuttun?', en: 'Forgot your password?' },
+  noAccount:       { tr: 'Hesabın yok mu?', en: "Don't have an account?" },
 };
 
 type Ctx = {
