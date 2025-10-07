@@ -231,7 +231,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 sm:px-6 relative">
+    <main className="min-h-screen flex items-center justify-center px-6 relative">
       <Link
         href="/"
         className="absolute top-4 left-4 text-sm text-slate-600 dark:text-slate-300 hover:underline underline-offset-2"
@@ -239,11 +239,11 @@ export default function RegisterPage() {
         {t('back')}
       </Link>
 
-      <section className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/80 dark:bg-slate-900/70 p-8 sm:p-10 shadow-xl backdrop-blur-lg">
+      <section className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/80 dark:bg-white/10 p-6 shadow-xl backdrop-blur-lg">
         <h1 className="text-3xl font-bold mb-1">{t('registerTitle')}</h1>
         <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">{t('createAccount')}</p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm mb-1">{t('username')}</label>
             <input
@@ -330,7 +330,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isSubmitting || sendingCode}
-            className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold py-3 hover:opacity-95 active:scale-[0.98] transition disabled:opacity-70"
+            className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold py-2.5 hover:opacity-95 active:scale-[0.98] transition disabled:opacity-70"
           >
             {t('registerTitle')}
           </button>
