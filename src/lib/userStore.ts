@@ -6,6 +6,16 @@ export type StoredUser = {
   createdAt: string;
 };
 
+export class UserStoreError extends Error {
+  code: 'constraint' | 'unavailable' | 'unknown';
+
+  constructor(message: string, code: UserStoreError['code']) {
+    super(message);
+    this.name = 'UserStoreError';
+    this.code = code;
+  }
+}
+
 const DB_NAME = 'pulsetalk-auth';
 const DB_VERSION = 1;
 const STORE_NAME = 'users';
@@ -43,14 +53,17 @@ const closeWhenDone = (db: IDBDatabase, tx: IDBTransaction) => {
   tx.onabort = () => {
     db.close();
   };
-  tx.onerror = () => {
+  tx.onerror = (event) => {
+    event.preventDefault();
     db.close();
   };
 };
 
 export async function addUser(user: Omit<StoredUser, 'createdAt'> & { createdAt?: string }): Promise<void> {
   const db = await openDB();
-  if (!db) return;
+  if (!db) {
+    throw new UserStoreError('IndexedDB kullanılamıyor', 'unavailable');
+  }
 
   const record: StoredUser = {
     ...user,
@@ -63,7 +76,15 @@ export async function addUser(user: Omit<StoredUser, 'createdAt'> & { createdAt?
     const store = tx.objectStore(STORE_NAME);
     const request = store.add(record);
     request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error ?? new Error('Kullanıcı ekleme hatası'));
+    request.onerror = (event) => {
+      event.preventDefault();
+      const err = request.error;
+      if (err instanceof DOMException && err.name === 'ConstraintError') {
+        reject(new UserStoreError('Kayıt zaten mevcut', 'constraint'));
+      } else {
+        reject(new UserStoreError(err?.message ?? 'Kullanıcı oluşturulamadı', 'unknown'));
+      }
+    };
   });
 }
 
@@ -79,7 +100,10 @@ export async function getUserByUsername(username: string): Promise<StoredUser | 
     request.onsuccess = () => {
       resolve((request.result as StoredUser | undefined) ?? null);
     };
-    request.onerror = () => reject(request.error ?? new Error('Kullanıcı alınamadı'));
+    request.onerror = (event) => {
+      event.preventDefault();
+      reject(request.error ?? new Error('Kullanıcı alınamadı'));
+    };
   });
 }
 
@@ -96,7 +120,10 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
     request.onsuccess = () => {
       resolve((request.result as StoredUser | undefined) ?? null);
     };
-    request.onerror = () => reject(request.error ?? new Error('E-posta aranamadı'));
+    request.onerror = (event) => {
+      event.preventDefault();
+      reject(request.error ?? new Error('E-posta aranamadı'));
+    };
   });
 }
 
@@ -112,6 +139,9 @@ export async function getAllUsers(): Promise<StoredUser[]> {
     request.onsuccess = () => {
       resolve((request.result as StoredUser[]) ?? []);
     };
-    request.onerror = () => reject(request.error ?? new Error('Kullanıcı listesi alınamadı'));
+    request.onerror = (event) => {
+      event.preventDefault();
+      reject(request.error ?? new Error('Kullanıcı listesi alınamadı'));
+    };
   });
 }

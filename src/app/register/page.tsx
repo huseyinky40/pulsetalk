@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import zxcvbn from 'zxcvbn';
 import { useLang } from '../../components/LangProvider';
-import { addUser, getUserByEmail, getUserByUsername } from '../../lib/userStore';
+import { UserStoreError, addUser, getUserByEmail, getUserByUsername } from '../../lib/userStore';
 
 const passwordSchema = z
   .string()
@@ -190,6 +190,27 @@ export default function RegisterPage() {
         alert(lang === 'tr' ? 'Kayıt işlemi başarıyla tamamlandı!' : 'Registration completed successfully!');
       } catch (error) {
         console.error('Kullanıcı kaydedilemedi:', error);
+
+        if (error instanceof UserStoreError) {
+          if (error.code === 'constraint') {
+            setVerificationError(
+              lang === 'tr'
+                ? 'Bu kullanıcı adı veya e-posta zaten doğrulanmış.'
+                : 'This username or email is already confirmed.',
+            );
+            return;
+          }
+
+          if (error.code === 'unavailable') {
+            setVerificationError(
+              lang === 'tr'
+                ? 'Tarayıcın veritabanına erişemiyor. Lütfen farklı bir tarayıcı dene.'
+                : 'Your browser cannot access the database. Please try another browser.',
+            );
+            return;
+          }
+        }
+
         setVerificationError(
           lang === 'tr'
             ? 'Kayıt sırasında bir hata oldu. Lütfen tekrar dene.'
