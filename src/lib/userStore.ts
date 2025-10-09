@@ -24,13 +24,20 @@ export async function addUser(u: StoredUser): Promise<void> {
   }
 }
 
+type ApiUser = {
+  username: string;
+  email: string;
+  birth: string;
+  createdAt: string;
+};
+
 // Tüm kullanıcıları çek
 export async function getAllUsers(): Promise<StoredUser[]> {
   const res = await fetch(base, { cache: 'no-store' });
   if (!res.ok) throw new Error('Kullanıcı listesi alınamadı');
 
-  const list = await res.json();
-  return list.map((x: any) => ({
+  const list = (await res.json()) as ApiUser[];
+  return list.map((x) => ({
     username: x.username,
     email: x.email,
     birth: new Date(x.birth).toISOString(),
